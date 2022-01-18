@@ -1,32 +1,32 @@
-import React, { Component } from 'react';
-import isEmpty from 'lodash.isempty';
+import React, { Component } from "react";
+import isEmpty from "lodash.isempty";
 
 // components:
-import Marker from '../components/Marker';
+import Marker from "../components/Marker";
 
 // examples:
-import GoogleMap from '../components/GoogleMap';
+import GoogleMap from "../components/GoogleMap";
 
 // consts
-import LOS_ANGELES_CENTER from '../const/la_center';
+import DEFAULT_CENTER from "../const/default_center";
+import CurrentLocator from "../components/CurrentLocator";
 
 // Return map bounds based on list of places
 const getMapBounds = (map, maps, places) => {
   const bounds = new maps.LatLngBounds();
 
   places.forEach((place) => {
-    bounds.extend(new maps.LatLng(
-      place.geometry.location.lat,
-      place.geometry.location.lng,
-    ));
+    bounds.extend(
+      new maps.LatLng(place.geometry.location.lat, place.geometry.location.lng)
+    );
   });
   return bounds;
 };
 
 // Re-center map when resizing the window
 const bindResizeListener = (map, maps, bounds) => {
-  maps.event.addDomListenerOnce(map, 'idle', () => {
-    maps.event.addDomListener(window, 'resize', () => {
+  maps.event.addDomListenerOnce(map, "idle", () => {
+    maps.event.addDomListener(window, "resize", () => {
       map.fitBounds(bounds);
     });
   });
@@ -48,27 +48,57 @@ class Main extends Component {
 
     this.state = {
       places: [],
+      currentLocation: {
+        lat: 0,
+        lng: 0,
+      },
+      zoom: 11,
     };
   }
 
   componentDidMount() {
-    fetch('places.json')
+    fetch("/google-map-react-examples/places.json", {
+      "Content-Type": "application/json",
+    })
       .then((response) => response.json())
-      .then((data) => this.setState({ places: data.results }));
+      .then((data) => {
+        data.results.forEach((result) => {
+          result.show = false; // eslint-disable-line no-param-reassign
+        });
+        this.setState({ places: data.results });
+      });
+    const getPosition = function (position) {
+      this.setState((prevState) => ({
+        ...prevState,
+        currentLocation: {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        },
+      }));
+    }.bind(this);
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(getPosition);
+    }
   }
 
   render() {
-    const { places } = this.state;
+    const { places, currentLocation, zoom } = this.state;
     return (
       <>
         {!isEmpty(places) && (
           <GoogleMap
+            bootstrapURLKeys={{ key: process.env.API_KEY }}
             defaultZoom={10}
-            defaultCenter={LOS_ANGELES_CENTER}
+            zoom={zoom}
+            defaultCenter={DEFAULT_CENTER}
+            center={[currentLocation.lat, currentLocation.lng]}
             yesIWantToUseGoogleMapApiInternals
-            onGoogleApiLoaded={({ map, maps }) => apiIsLoaded(map, maps, places)}
+            layerTypes={["TrafficLayer", "TransitLayer"]}
+            onGoogleApiLoaded={({ map, maps }) =>
+              apiIsLoaded(map, maps, places)
+            }
           >
-            {places.map((place) => (
+            {[].map((place) => (
               <Marker
                 key={place.id}
                 text={place.name}
@@ -76,6 +106,12 @@ class Main extends Component {
                 lng={place.geometry.location.lng}
               />
             ))}
+            {currentLocation && (
+              <CurrentLocator
+                lat={currentLocation.lat}
+                lng={currentLocation.lng}
+              />
+            )}
           </GoogleMap>
         )}
       </>
