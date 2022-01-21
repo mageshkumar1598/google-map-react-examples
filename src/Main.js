@@ -23,7 +23,14 @@ class MyGoogleMap extends Component {
     places: [],
     center: [],
     zoom: 9,
-    address: "",
+    address: {
+      state: "",
+      country: "",
+      city: "",
+      pinCode: "",
+      area: "",
+      fullAddress: "",
+    },
     draggable: true,
     lat: "",
     lng: "",
@@ -94,6 +101,8 @@ class MyGoogleMap extends Component {
 
   addPlaceByAutoComplete = (place) => {
     console.log("AUTO COMPLETE__", place);
+    // let extractAddress = this.extractAddress(place?.address_components);
+
     this.setState({
       places: [place],
       lat: place.geometry.location.lat(),
@@ -103,14 +112,57 @@ class MyGoogleMap extends Component {
   };
 
   addPlaceBySearch = (place) => {
-    let { formatted_address, geometry } = place && place[0];
+    let { formatted_address, geometry, address_components } = place && place[0];
+    let extractAddress = this.extractAddress(address_components);
     this.setState({
-      address: formatted_address,
-      zoom: 12,
+      address: { ...extractAddress, fullAddress: formatted_address },
+      zoom: 15,
       lat: geometry.location.lat(),
       lng: geometry.location.lng(),
     });
   };
+  extractAddress(addressArray = []) {
+    let placeInfo = {};
+    if (addressArray && addressArray.length > 0) {
+      addressArray.forEach((el) => {
+        if (
+          el.types.find(
+            (type) => ["locality"].includes(type) //administrative_level_1
+          )
+        ) {
+          placeInfo.city = el.long_name;
+        } else if (
+          el.types.find((type) =>
+            ["state", "administrative_area_level_1"].includes(type)
+          )
+        ) {
+          placeInfo.state = el.long_name;
+        } else if (el.types.find((type) => type === "country")) {
+          placeInfo.country = el.long_name;
+        } else if (el.types.find((type) => type === "postal_code")) {
+          placeInfo.pinCode = el.long_name;
+        } else if (
+          el.types.find((type) =>
+            [
+              "sublocality_level_1",
+              "sublocality_level_2",
+              "sublocality",
+            ].includes(type)
+          )
+        ) {
+          placeInfo.area = el.long_name;
+        } else if (
+          el.types.find((type) => ["street_number", "route"].includes(type))
+        ) {
+          let streetNo =
+            el.types.find((type) => type === "street_number") || "";
+          let streetName = el.types.find((type) => type === "route") || "";
+          placeInfo.streetAddress = `${streetNo} ${streetName}`;
+        }
+      });
+    }
+    return placeInfo;
+  }
   _generateAddress() {
     const { mapApi } = this.state;
 
@@ -121,9 +173,15 @@ class MyGoogleMap extends Component {
       (results, status) => {
         if (status === "OK") {
           if (results[0]) {
+            let extractAddress = this.extractAddress(
+              results[0].address_components
+            );
             this.setState({
-              address: results[0].formatted_address,
-              zoom: 12,
+              address: {
+                ...extractAddress,
+                fullAddress: results[0].formatted_address,
+              },
+              zoom: 15,
             });
           } else {
             window.alert("No results found");
@@ -169,6 +227,7 @@ class MyGoogleMap extends Component {
       center,
       zoom,
       draggable,
+      address,
     } = this.state;
     return (
       <Wrapper>
@@ -200,11 +259,7 @@ class MyGoogleMap extends Component {
             }}
             defaultZoom={10}
           >
-            <Marker
-              text={this.state.address}
-              lat={this.state.lat}
-              lng={this.state.lng}
-            />
+            <Marker lat={this.state.lat} lng={this.state.lng} />
           </GoogleMapReact>
         )}
         <button onClick={this.toggleShowMap}>
@@ -230,7 +285,21 @@ class MyGoogleMap extends Component {
             }}
           />
           <div className="map-details">
-            Address: <span>{this.state.address}</span>
+            <label>
+              Area <input disabled value={address.area} />
+            </label>
+            <label>
+              City <input disabled value={address.city} />
+            </label>
+            <label>
+              State <input disabled value={address.state} />
+            </label>
+            <label>
+              Country <input disabled value={address.country} />
+            </label>
+            <label>
+              PinCode <input disabled value={address.pinCode} />
+            </label>
           </div>
         </div>
         {mapApiLoaded && (
@@ -242,20 +311,20 @@ class MyGoogleMap extends Component {
               Use my current location
             </button>
             <hr />
-            <h1>Auto complete</h1>
+            <h1>Search by auto complete</h1>
             <AutoComplete
               map={mapInstance}
               mapApi={mapApi}
               addplace={this.addPlaceByAutoComplete}
             />
             <br />
-            <h1>Search box</h1>
+            {/* <h1>Search box</h1>
             <SearchBox
               map={mapInstance}
               mapApi={mapApi}
               addplace={this.addPlaceBySearch}
             />
-            <br />
+            <br /> */}
           </div>
         )}
       </Wrapper>

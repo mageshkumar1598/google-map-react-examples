@@ -63,7 +63,7 @@ class SearchBox extends Component {
           />
           <button onClick={this.clearSearchBox}>Clear</button>
         </Wrapper>
-        <h1>When to use AutoComplete</h1>
+        <h1>When to use Searchbox</h1>
         <ul style={{ textAlign: "left" }}>
           <li>
             When we need an extended list of predictions, which can include

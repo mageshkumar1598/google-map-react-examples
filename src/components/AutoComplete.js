@@ -73,7 +73,7 @@ class AutoComplete extends Component {
           />
           <button onClick={this.clearSearchBox}>Clear</button>
         </Wrapper>
-        <h1>When to use Searchbox</h1>
+        <h1>When to use Autocomplete</h1>
         <ul style={{ textAlign: "left" }}>
           <li>
             This will add a UI Controls in our DOM and when the user search will
