@@ -1,12 +1,16 @@
-import React, { Component } from 'react';
-import styled from 'styled-components';
+// Autocomplete.js
+import React, { Component } from "react";
+import styled from "styled-components";
 
 const Wrapper = styled.div`
   position: relative;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  padding: 20px;
+  flex: 1 1 auto;
+  padding: 5px;
+  display: flex;
+
+  button {
+    flex: 0 0 200px;
+  }
 `;
 
 class AutoComplete extends Component {
@@ -18,16 +22,17 @@ class AutoComplete extends Component {
   componentDidMount({ map, mapApi } = this.props) {
     const options = {
       // restrict your search to a specific type of result
-      // types: ['geocode', 'address', 'establishment', '(regions)', '(cities)'],
+      types: ["geocode", "establishment"], // this to list only specific type of place details like only geocode or only address ["address"]
+      fields: ["name", "geometry", "formatted_address", "address_components"], // to return only specified values from api
       // restrict your search to a specific country, or an array of countries
-      // componentRestrictions: { country: ['gb', 'us'] },
+      componentRestrictions: { country: ["in"] }, // for us it is not required
     };
     this.autoComplete = new mapApi.places.Autocomplete(
       this.searchInput,
-      options,
+      options
     );
-    this.autoComplete.addListener('place_changed', this.onPlaceChanged);
-    this.autoComplete.bindTo('bounds', map);
+    this.autoComplete.addListener("place_changed", this.onPlaceChanged);
+    this.autoComplete.bindTo("bounds", map);
   }
 
   componentWillUnmount({ mapApi } = this.props) {
@@ -50,21 +55,46 @@ class AutoComplete extends Component {
   };
 
   clearSearchBox() {
-    this.searchInput.value = '';
+    this.searchInput.value = "";
   }
 
   render() {
     return (
-      <Wrapper>
-        <input
-          ref={(ref) => {
-            this.searchInput = ref;
-          }}
-          type="text"
-          onFocus={this.clearSearchBox}
-          placeholder="Enter a location"
-        />
-      </Wrapper>
+      <>
+        <Wrapper>
+          <input
+            className="search-input"
+            ref={(ref) => {
+              this.searchInput = ref;
+            }}
+            style={{ width: "100%", height: "100%", padding: "10px" }}
+            type="text"
+            placeholder="Enter a location"
+          />
+          <button onClick={this.clearSearchBox}>Clear</button>
+        </Wrapper>
+        <h1>When to use Searchbox</h1>
+        <ul style={{ textAlign: "left" }}>
+          <li>
+            This will add a UI Controls in our DOM and when the user search will
+            returns place predictions in the form of a dropdown pick list.
+          </li>
+
+          <li>
+            When the user selects a place from the list, information about the
+            place is returned
+          </li>
+          <li>
+            This class has many controls like types of place details, search
+            restriction options etc
+          </li>
+          <li>
+            <a href="https://developers.google.com/maps/documentation/javascript/reference/places-widget?hl=en">
+              https://developers.google.com/maps/documentation/javascript/reference/places-widget?hl=en
+            </a>
+          </li>
+        </ul>
+      </>
     );
   }
 }

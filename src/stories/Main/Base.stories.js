@@ -1,10 +1,10 @@
-import React from 'react';
-import styled from 'styled-components';
+import React from "react";
+import styled from "styled-components";
 
-import Main from '../../examples/Main';
+import Main from "../../examples/Main";
 
 export default {
-  title: 'Main Examples',
+  title: "Main Examples",
 };
 
 export const Base = () => (
@@ -14,6 +14,7 @@ export const Base = () => (
 );
 
 const Wrapper = styled.section`
-  width: 100vw;
-  height: 100vh;
+  width: 400px;
+  height: auto;
+  maxheight: 100%;
 `;

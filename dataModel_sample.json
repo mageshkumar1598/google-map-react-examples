@@ -1,0 +1,14 @@
+{
+  "field_name": {
+    "latitude": "12.34534",
+    "langtitude": "35.5676547",
+    "address": {
+      "city": "Chennai",
+      "country": "India",
+      "street": "Alagar street",
+      "state": "Tamilnadu",
+      "pincode": "609090",
+      "fullAddress": "43, Alagar street, raman nagar, Chennai, Tamilnadu 609090, India"
+    }
+  }
+}

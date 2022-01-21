@@ -1,13 +1,12 @@
 import React from "react";
 
 import "./App.css";
-
-import { Base } from "./stories/Main/Base.stories";
+import MyGoogleMap from "./Main";
 
 function App() {
   return (
     <div className="App">
-      <Base />
+      <MyGoogleMap />
     </div>
   );
 }
