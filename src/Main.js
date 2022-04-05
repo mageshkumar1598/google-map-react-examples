@@ -8,13 +8,21 @@ import styled from "styled-components";
 import AutoComplete from "./components/AutoComplete";
 import Marker from "./components/Marker";
 import Coordinates from "./components/Coordinates";
-import SearchBox from "./components/SearchBox";
+// import SearchBox from "./components/SearchBox";
 const Wrapper = styled.main`
   width: 100%;
   height: 500px;
 `;
 
 class MyGoogleMap extends Component {
+  defaultAddress = {
+    state: "",
+    country: "",
+    city: "",
+    pinCode: "",
+    area: "",
+    fullAddress: "",
+  };
   state = {
     mapApiLoaded: false,
     mapInstance: null,
@@ -122,7 +130,7 @@ class MyGoogleMap extends Component {
     });
   };
   extractAddress(addressArray = []) {
-    let placeInfo = {};
+    let placeInfo = { ...this.defaultAddress };
     if (addressArray && addressArray.length > 0) {
       addressArray.forEach((el) => {
         if (
@@ -217,7 +225,6 @@ class MyGoogleMap extends Component {
   }
   render() {
     const {
-      places,
       mapApiLoaded,
       mapInstance,
       mapApi,
@@ -229,6 +236,7 @@ class MyGoogleMap extends Component {
       draggable,
       address,
     } = this.state;
+
     return (
       <Wrapper>
         {showMap && (
@@ -243,14 +251,11 @@ class MyGoogleMap extends Component {
             onChildClick={() => {}}
             onClick={this._onClick}
             bootstrapURLKeys={{
-              // key: "AIzaSyCsMpZdfI2ZfBL1DLX09RTns9wBLxO80mk",
-              key: "AIzaSyCtcKIOrupyjYaLwR2SMCrg5XyPrvGN2wA",
-              libraries: ["places", "geometry"],
+              key: process.env.REACT_APP_PRABHU_API_KEY,
+              libraries: ["places"],
             }}
             yesIWantToUseGoogleMapApiInternals
-            onGoogleApiLoaded={({ map, maps }) =>
-              this.apiHasLoaded(map, maps, places)
-            }
+            onGoogleApiLoaded={({ map, maps }) => this.apiHasLoaded(map, maps)}
             options={{
               panControl: true,
               mapTypeControl: true,
@@ -300,6 +305,7 @@ class MyGoogleMap extends Component {
             <label>
               PinCode <input disabled value={address.pinCode} />
             </label>
+            <label>Address : {address.fullAddress}</label>
           </div>
         </div>
         {mapApiLoaded && (

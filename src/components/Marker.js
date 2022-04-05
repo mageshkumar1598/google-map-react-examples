@@ -27,7 +27,7 @@ Marker.defaultProps = {
 
 Marker.propTypes = {
   onClick: PropTypes.func,
-  text: PropTypes.string.isRequired,
+  text: PropTypes.string,
 };
 
 export default Marker;
